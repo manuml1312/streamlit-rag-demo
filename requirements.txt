@@ -2,13 +2,10 @@ altair
 numpy
 pandas
 pydeck
-streamlit==1.26.0
+streamlit
 openai
 pypdf2
-langchain==0.0.279
-pinecone_client==2.2.2
+langchain
 faiss-cpu
 pathlib
-SQLite4
-chromadb
 tiktoken
