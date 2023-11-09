@@ -58,7 +58,7 @@ with st.sidebar:
         with st.spinner("Processing"):
             vector_store = text(pdf_docs)
 
-user_question = st.text_input("Learn about our Products and Materials")
+user_question = st.text_input("Learn about our Products and Materials",placeholder="Enter your query here",disabled = not pdf_docs)
 
 if user_question:
     with st.spinning("Thinking"):
