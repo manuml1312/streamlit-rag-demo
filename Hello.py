@@ -10,7 +10,7 @@ from langchain.memory import ConversationBufferMemory
 import os
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
-OPENAI_API_KEY= os.getenv['OPENAI_API_KEY']# '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'
+OPENAI_API_KEY= st.secrets.openai_api # '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'
 
 def get_pdf_text(pdf_docs):
     text=""
