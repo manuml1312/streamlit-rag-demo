@@ -26,12 +26,12 @@ def get_text_chunks(text):
     return chunks
 
 def get_vector_store(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
+    embeddings = OpenAIEmbeddings(openai_api_key = openai.api_key)
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     return vector_store
 
 def get_conversational_chain(vector_store):
-    llm = ChatOpenAI(openai_api_key = OPENAI_API_KEY)
+    llm = ChatOpenAI(openai_api_key = openai.api_key)
     memory = ConversationBufferMemory(memory_key = "chat_history", return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
     return conversation_chain
