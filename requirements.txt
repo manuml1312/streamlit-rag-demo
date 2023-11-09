@@ -9,6 +9,6 @@ langchain==0.0.279
 pinecone_client==2.2.2
 faiss-cpu
 pathlib
-sqlite3 >= 3.35.0.
+SQLite4
 chromadb
 tiktoken
