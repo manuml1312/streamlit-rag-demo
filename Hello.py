@@ -44,7 +44,7 @@ def process_documents():
     pdf_docs = st.session_state.source_docs
     text= get_pdf_text(pdf_docs)
     chunks=get_text_chunks(text)
-    st.session_state.retriever=get_vector_store(text_chunks)
+    st.session_state.retriever=get_vector_store(chunks)
     
 def input_fields(): 
     with st.sidebar:
