@@ -48,10 +48,10 @@ def main():
     st.set_page_config("Chat with Multiple PDFs")
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
-    if "conversation" not in st.session_state:
-        st.session_state.conversation = None
-    if "chatHistory" not in st.session_state:
-        st.session_state.chatHistory = None
+    # if "conversation" not in st.session_state:
+    #     st.session_state.conversation = None
+    # if "chatHistory" not in st.session_state:
+    #     st.session_state.chatHistory = None
     if user_question:
         user_input(user_question)
     with st.sidebar:
