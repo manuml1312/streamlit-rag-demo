@@ -1,7 +1,7 @@
 import streamlit as st 
 import os
 import openai
-from PyPDF2 import PdfReader
+# from PyPDF2 import PdfReader
 from llama_index import VectorStoreIndex, SimpleDirectoryReader , Document
 from llama_index.embeddings import HuggingFaceEmbedding 
 from llama_index import ServiceContext
