@@ -25,7 +25,7 @@ if uploaded_file:
               all questions. Assume that all questions are related to the document. Keep your answers accurate and based on 
                    facts retrieved from the document – do not hallucinate features.""")
 
-    documents = uploaded_file.read().decode()
+    documents = SimpleDirectoryReader(uploaded_file)#.read().decode()
     service_context = ServiceContext.from_defaults(llm=llm) 
     index = VectorStoreIndex.from_documents(documents, service_context=service_context)
 
