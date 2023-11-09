@@ -7,6 +7,5 @@ openai
 pypdf2
 langchain
 faiss-cpu
-faiss-gpu
 pathlib
 chromadb
