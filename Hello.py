@@ -1,6 +1,7 @@
 import streamlit as st 
 import os
 import openai
+from PyPDF2 import PdfReader
 from llama_index import VectorStoreIndex, SimpleDirectoryReader , Document
 from llama_index.embeddings import HuggingFaceEmbedding 
 from llama_index import ServiceContext
@@ -12,7 +13,7 @@ openai.api_key = st.secrets.openai_key #
 st.title("📝 RAG - Demo ")
 
 with st.sidebar:
-    uploaded_file=st.file_uploader("Upload the reference file to retrieve information",type=("txt","md","pdf"))
+    uploaded_file=st.file_uploader("Upload the reference file to retrieve information",type=("pdf"))
 
 if uploaded_file:
     if "messages" not in st.session_state.keys(): # Initialize the chat messages history
@@ -25,7 +26,7 @@ if uploaded_file:
               all questions. Assume that all questions are related to the document. Keep your answers accurate and based on 
                    facts retrieved from the document – do not hallucinate features.""")
 
-    documents = SimpleDirectoryReader(uploaded_file)#.read().decode()
+    documents = PdfReader(uploaded_file)  #.read().decode()
     service_context = ServiceContext.from_defaults(llm=llm) 
     index = VectorStoreIndex.from_documents(documents, service_context=service_context)
 
