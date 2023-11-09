@@ -47,7 +47,7 @@ def user_input(user_question):
             st.write("Bot: ", message.content)
 def main():
     st.set_page_config("Retrieve Info")
-    st.header("LLM Powered Chatbot")
+    st.header("Covestro LLM Powered Chatbot")
     user_question = st.text_input("Learn about our Products and Materials")
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
