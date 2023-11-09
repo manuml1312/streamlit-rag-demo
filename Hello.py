@@ -10,6 +10,8 @@ from langchain.chat_models import ChatOpenAI
 
 OPENAI_API_KEY= st.secrets.openai_api
 
+LOCAL_VECTOR_STORE_DIR = Path(__file__).resolve().parent.joinpath('data', 'vector_store')
+
 def get_pdf_text(pdf_docs):
     text=""
     for pdf in pdf_docs:
@@ -23,9 +25,11 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-def get_vector_store(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
-    retriever = FAISS.from_texts(text_chunks, embedding=embeddings)
+def embeddings_on_local_vectordb(texts):
+    vectordb = Chroma.from_documents(texts, embedding=OpenAIEmbeddings(),
+                                     persist_directory=LOCAL_VECTOR_STORE_DIR.as_posix())
+    vectordb.persist()
+    retriever = vectordb.as_retriever(search_kwargs={'k': 7})
     return retriever
 
 def query_llm(retriever,query):
