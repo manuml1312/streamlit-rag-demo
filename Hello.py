@@ -40,21 +40,22 @@ def query_llm(retriever,query):
     st.session_state.messages.append((query,result))
     return result
 
-def process_documents():
-    for source_doc in st.session_state.source_docs:
-        pdf_docs = source_doc
-        text= get_pdf_text(pdf_docs)
-        chunks=get_text_chunks(text)
-        st.session_state.retriever=get_vector_store(chunks)
+# def process_documents():
+#     for source_doc in st.session_state.source_docs:
+        
     
-def input_fields(): 
-    with st.sidebar:
-        st.session_state.source_docs=st.file_uploader(label="Upload the relevant documents for querying",type="pdf",accept_multiple_files=True)
+# def input_fields(): 
+    # with st.sidebar:
+        # st.session_state.source_docs=st.file_uploader(label="Upload the relevant documents for querying",type="pdf",accept_multiple_files=True)
 
 def boot():
-    input_fields()
     with st.sidebar:
-        st.button("Process",on_click=process_documents)
+        pdf_docs=st.file_uploader(label="Upload the relevant documents for querying",type="pdf",accept_multiple_files=True)
+        st.button("Process"):
+            st.thinker("Processing"):
+                text= get_pdf_text(pdf_docs)
+                chunks=get_text_chunks(text)
+                st.session_state.retriever=get_vector_store(chunks)
     if "messages" not in st.session_state:
         st.session_state.messages=[]
     # for message in st.session_state.messages:
