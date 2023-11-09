@@ -52,7 +52,7 @@ def boot():
     with st.sidebar:
         pdf_docs=st.file_uploader(label="Upload the relevant documents for querying",type="pdf",accept_multiple_files=True)
         if st.button("Process"):
-            with st.thinker("Processing"):
+            with st.spinner("Processing"):
                 text= get_pdf_text(pdf_docs)
                 chunks=get_text_chunks(text)
                 st.session_state.retriever=get_vector_store(chunks)
