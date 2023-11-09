@@ -60,8 +60,10 @@ with st.sidebar:
 
 if not pdf_docs:
     st.write("Upload a document before accessing the chatbot")
-    
-user_question = st.text_input("Learn about our Products and Materials",placeholder="Enter your query here")
+
+if user_question :=st.text_input("Learn about our Products and Materials",placeholder="Enter your query here"):
+    st.session_state.conversation.append({"role": "user", "content": user_question})
+# user_question = st.text_input("Learn about our Products and Materials",placeholder="Enter your query here")
 
 if user_question:
     user_input(user_question)
