@@ -65,7 +65,7 @@ def main():
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
                 for message in st.session_state.conversation:
-                    st.write(f"{message['role']}: {message['content']}")                
+                    st.write({message['role']: message['content']})                
                 st.success("Done")
             
 
