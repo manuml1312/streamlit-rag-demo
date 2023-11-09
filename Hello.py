@@ -12,14 +12,15 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 OPENAI_API_KEY= st.secrets.openai_api
 
-pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", accept_multiple_files=True)
-if st.button("Process"):
-    with st.spinner("Processing"):
-        text=""
-        for pdf in pdf_docs:
-            pdf_reader= PdfReader(pdf)
-            for page in pdf_reader.pages:
-                text+= page.extract_text()
+with st.sidebar:
+    pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", accept_multiple_files=True)
+    if st.button("Process"):
+        with st.spinner("Processing"):
+            text=""
+            for pdf in pdf_docs:
+                pdf_reader= PdfReader(pdf)
+                for page in pdf_reader.pages:
+                    text+= page.extract_text()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
 chunks = text_splitter.split_text(text)
@@ -33,7 +34,7 @@ conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=ve
 
 
 if "chat_engine" not in st.session_state.keys(): # Initialize the chat engine
-        st.session_state.chat_engine = conversation_chain.as_chat_engine(chat_mode="condense_question", verbose=True)
+        st.session_state.chat_engine = llm.as_chat_engine(chat_mode="condense_question", verbose=True)
 
 # if prompt := st.chat_input("Mention your requirements, based on which I can suggest materials",placeholder="Your processing queries here"): 
 
