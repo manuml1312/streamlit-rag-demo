@@ -58,6 +58,9 @@ def main():
         st.title("SoothsayerAnalytics")
         #st.subheader("Upload your Documents Here")
         pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", accept_multiple_files=True)
+        if st.button("Clear Chat"):
+            st.session_state.conversation = None
+            st.session_state.chatHistory = None
         if st.button("Process"):
             with st.spinner("Processing"):
                 raw_text = get_pdf_text(pdf_docs)
@@ -65,6 +68,8 @@ def main():
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
                 st.success("Done")
+
+with st.sidebar:
 
 
 
