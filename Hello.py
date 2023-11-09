@@ -61,7 +61,7 @@ with st.sidebar:
 user_question = st.text_input("Learn about our Products and Materials")
 
 if user_question:
-    with st.spinning("Thinking")
+    with st.spinning("Thinking"):
         user_input(user_question)    
         st.session_state.conversation = model(vector_store)
         st.success("Done")
