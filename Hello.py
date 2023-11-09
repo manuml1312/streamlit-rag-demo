@@ -39,11 +39,8 @@ def get_conversational_chain(vector_store):
 def user_input(user_question):
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chatHistory = response['chat_history']
-    for i, message in enumerate(st.session_state.chatHistory):
-        if i%2 == 0:
-            st.write("Human: ", message.content)
-        else:
-            st.write("Bot: ", message.content)
+    for message in st.session_state.chatHistory:
+            st.write({"human":user_question,"Bot: ", message.content})
 def main():
     st.set_page_config("Chat with Multiple PDFs")
     st.header("LLM Powered Chatbot")
