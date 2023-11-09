@@ -1,47 +1,72 @@
-import streamlit as st 
+import streamlit as st
+from PyPDF2 import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+#import google.generativeai as palm
+from langchain.embeddings import GooglePalmEmbeddings
+from langchain.llms import GooglePalm
+from langchain.vectorstores import FAISS
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
 import os
-import openai
-# from PyPDF2 import PdfReader
-from llama_index import VectorStoreIndex, SimpleDirectoryReader , Document
-from llama_index.embeddings import HuggingFaceEmbedding 
-from llama_index import ServiceContext
-from llama_index.llms import OpenAI
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.chat_models import ChatOpenAI
+OPENAI_API_KEY= os.getenv['OPENAI_API_KEY']# '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'
 
-openai.api_key = st.secrets.openai_key #
-# openai.api_key=os.envget("openai_key")  #st.secrets.openai_key
+def get_pdf_text(pdf_docs):
+    text=""
+    for pdf in pdf_docs:
+        pdf_reader= PdfReader(pdf)
+        for page in pdf_reader.pages:
+            text+= page.extract_text()
+    return  text
 
-st.title("📝 RAG - Demo ")
+def get_text_chunks(text):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
+    chunks = text_splitter.split_text(text)
+    return chunks
 
-with st.sidebar:
-    uploaded_file=st.file_uploader("Upload the reference file to retrieve information",type=("pdf"))
+def get_vector_store(text_chunks):
+    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
+    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+    return vector_store
 
-if uploaded_file:
-    if "messages" not in st.session_state.keys(): # Initialize the chat messages history
-        st.session_state.messages = [
-            {"role": "assistant", "content": "Ask me a question about any info within the document!"}
-        ]
+def get_conversational_chain(vector_store):
+    llm = ChatOpenAI(openai_api_key = OPENAI_API_KEY)
+    memory = ConversationBufferMemory(memory_key = "chat_history", return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
+    return conversation_chain
 
-    
-    llm = OpenAI(model="gpt-3.5-turbo", temperature=0.3, system_prompt="""You are an expert on the uploaded document and your job is to answer 
-              all questions. Assume that all questions are related to the document. Keep your answers accurate and based on 
-                   facts retrieved from the document – do not hallucinate features.""")
+def user_input(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chatHistory = response['chat_history']
+    for i, message in enumerate(st.session_state.chatHistory):
+        if i%2 == 0:
+            st.write("Human: ", message.content)
+        else:
+            st.write("Bot: ", message.content)
+def main():
+    st.set_page_config("Retrieve Info")
+    st.header("LLM Powered Chatbot")
+    user_question = st.text_input("Learn about our Products and Materials")
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chatHistory" not in st.session_state:
+        st.session_state.chatHistory = None
+    if user_question:
+        user_input(user_question)
+    with st.sidebar:
+        st.title("SoothsayerAnalytics")
+        #st.subheader("Upload your Documents Here")
+        pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", accept_multiple_files=True)
+        if st.button("Process"):
+            with st.spinner("Processing"):
+                raw_text = get_pdf_text(pdf_docs)
+                text_chunks = get_text_chunks(raw_text)
+                vector_store = get_vector_store(text_chunks)
+                st.session_state.conversation = get_conversational_chain(vector_store)
+                st.success("Done")
 
-    documents = SimpleDirectoryReader(input_files=uploaded_file).load_data()  #.read().decode()
-    service_context = ServiceContext.from_defaults(llm=llm) 
-    index = VectorStoreIndex.from_documents(documents, service_context=service_context)
-
-    if "chat_engine" not in st.session_state.keys(): # Initialize the chat engine
-        st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
-
-    if prompt :=st.text_input("Ask me any information from the document you uploaded",placeholder="Your query here",disabled=not uploaded_file):
-        st.session_state.messages.append({"role": "user", "content": prompt})
 
 
-# If last message is not from assistant, generate a new response
-    if st.session_state.messages[-1]["role"] != "assistant":
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = st.session_state.chat_engine.chat(prompt)
-                st.write(response.response)
-                message = {"role": "assistant", "content": response.response}
-                st.session_state.messages.append(message)
+if __name__ == "__main__":
+    main()
