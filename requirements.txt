@@ -9,6 +9,4 @@ langchain
 faiss-cpu
 pathlib
 chromadb
-sqlite3
-unstructured
-unstructured[pdf]
+tiktoken
