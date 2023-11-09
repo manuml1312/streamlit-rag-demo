@@ -57,7 +57,10 @@ with st.sidebar:
     if st.button("Process"):
         with st.spinner("Processing"):
             vector_store = text(pdf_docs)
-st.write("Upload a document before accessing the chatbot")
+
+if not pdf_docs:
+    st.write("Upload a document before accessing the chatbot")
+    
 user_question = st.text_input("Learn about our Products and Materials",placeholder="Enter your query here",disabled = not pdf_docs)
 
 if user_question:
