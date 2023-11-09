@@ -27,16 +27,15 @@ def get_text_chunks(text):
     return chunks
 
 def embeddings_on_local_vectordb(texts):
-    vectordb = FAISS.from_documents(texts, embedding=OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY),
-                                     persist_directory=LOCAL_VECTOR_STORE_DIR.as_posix())
-    vectordb.persist()
+    vectordb = FAISS.from_documents(texts, embedding=OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY))
+    # vectordb.persist()
     retriever = vectordb.as_retriever(search_kwargs={'k': 7})
     return retriever
 
 def query_llm(retriever,query):
     memory = ConversationBufferMemory(memory_key = "chat_history", return_messages=True)
     qa_chain = ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(openai_api_key = OPENAI_API_KEY), 
-                                                               retriever=vector_store.as_retriever(), memory=memory)
+                                                               retriever=retriever.as_retriever(), memory=memory)
     result=qa_chain({"question":query,"chat_history":st.session_state.messages})
     result=result['answer']
     st.session_state.messages.append((query,result))
@@ -55,7 +54,7 @@ def input_fields():
 def boot():
     input_fields()
     with st.sidebar:
-        st.button("Process",on_click=process_documents())
+        st.button("Process",on_click=process_documents)
     if "messages" not in st.session_state:
         st.session_state.messages=[]
     # for message in st.session_state.messages:
