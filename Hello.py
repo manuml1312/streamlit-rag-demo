@@ -26,10 +26,9 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-def embeddings_on_local_vectordb(texts):
-    vectordb = FAISS.from_documents(texts, embedding=OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY))
-    # vectordb.persist()
-    retriever = vectordb.as_retriever(search_kwargs={'k': 7})
+def get_vector_store(text_chunks):
+    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
+    retriever = FAISS.from_texts(text_chunks, embedding=embeddings)
     return retriever
 
 def query_llm(retriever,query):
@@ -45,7 +44,7 @@ def process_documents():
     pdf_docs = st.session_state.source_docs
     text= get_pdf_text(pdf_docs)
     chunks=get_text_chunks(text)
-    st.session_state.retriever=embeddings_on_local_vectordb(chunks)
+    st.session_state.retriever=get_vector_store(text_chunks)
     
 def input_fields(): 
     with st.sidebar:
