@@ -41,14 +41,15 @@ def query_llm(retriever,query):
     return result
 
 def process_documents():
-    pdf_docs = st.session_state.source_docs
-    text= get_pdf_text(pdf_docs)
-    chunks=get_text_chunks(text)
-    st.session_state.retriever=get_vector_store(chunks)
+    for source_doc in st.session_state.source_docs:
+        pdf_docs = source_doc
+        text= get_pdf_text(pdf_docs)
+        chunks=get_text_chunks(text)
+        st.session_state.retriever=get_vector_store(chunks)
     
 def input_fields(): 
     with st.sidebar:
-        st.session_state.source_docs=st.file_uploader(label="Upload the relevant documents for querying",accept_multiple_files=True)
+        st.session_state.source_docs=st.file_uploader(label="Upload the relevant documents for querying",type="pdf",accept_multiple_files=True)
 
 def boot():
     input_fields()
