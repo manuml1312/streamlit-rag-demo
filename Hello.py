@@ -64,7 +64,7 @@ if not pdf_docs:
 user_question = st.text_input("Learn about our Products and Materials",placeholder="Enter your query here",disabled = not pdf_docs)
 
 if user_question:
-    with st.spinning("Thinking"):
+    with st.spinner("Thinking"):
         user_input(user_question)    
         st.session_state.conversation = model(vector_store)
         st.success("Done")
