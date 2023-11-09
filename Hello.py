@@ -34,7 +34,7 @@ def model(vector_store):
     return conversation_chain
 
 def user_input(u_q):
-    response = st.session_state.conversation({'question': u_q})
+    response = st.session_state.conversation.append({'question': u_q})
     st.session_state.chatHistory = response['chat_history']
     for i, message in enumerate(st.session_state.chatHistory):
         if i%2 == 0:
