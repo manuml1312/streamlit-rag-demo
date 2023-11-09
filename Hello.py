@@ -1,51 +1,43 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+import streamlit as st 
+import os
+import openai
+from llama_index import VectorStoreIndex, SimpleDirectoryReader , Document
+from llama_index.embeddings import HuggingFaceEmbedding 
+from llama_index import ServiceContext
+from llama_index.llms import OpenAI
 
-import streamlit as st
-from streamlit.logger import get_logger
+openai.api_key = st.secrets.openai_key #
+# openai.api_key=os.envget("openai_key")  #st.secrets.openai_key
 
-LOGGER = get_logger(__name__)
+st.title("📝 RAG - Demo ")
 
+with st.sidebar:
+    uploaded_file=st.file_uploader("Upload the reference file to retrieve information",type=("txt","md","pdf"))
+    
+llm = OpenAI(model="gpt-3.5-turbo", temperature=0.3, system_prompt="""You are an expert on the uploaded document and your job is to answer 
+          all questions. Assume that all questions are related to the document. Keep your answers accurate and based on 
+                   facts retrieved from the document – do not hallucinate features.""")
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+documents = uploaded_file.read().decode()
+service_context = ServiceContext.from_defaults(llm=llm) 
+index = VectorStoreIndex.from_documents(documents, service_context=service_context)
 
-    st.write("# Welcome to Streamlit! 👋")
+if "messages" not in st.session_state.keys(): # Initialize the chat messages history
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Ask me a question about any info within the document!"}
+    ]
+    
+if "chat_engine" not in st.session_state.keys(): # Initialize the chat engine
+        st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
 
-    st.sidebar.success("Select a demo above.")
+if prompt :=st.text_input("Ask me any information from the document you uploaded",placeholder="Your query here"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
-
-
-if __name__ == "__main__":
-    run()
+# If last message is not from assistant, generate a new response
+if st.session_state.messages[-1]["role"] != "assistant":
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            response = st.session_state.chat_engine.chat(prompt)
+            st.write(response.response)
+            message = {"role": "assistant", "content": response.response}
+            st.session_state.messages.append(message)
