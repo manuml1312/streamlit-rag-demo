@@ -13,8 +13,8 @@ from langchain.chat_models import ChatOpenAI
 OPENAI_API_KEY= st.secrets.openai_api
 
 pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", accept_multiple_files=True)
-    if st.button("Process"):
-        with st.spinner("Processing"):
+if st.button("Process"):
+    with st.spinner("Processing"):
         text=""
         for pdf in pdf_docs:
             pdf_reader= PdfReader(pdf)
