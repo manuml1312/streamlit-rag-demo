@@ -11,8 +11,7 @@ import os
 import openai
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
-openai.api_key= st.secrets.openai_api # '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'
-
+openai.api_key= st.secrets.openai_api 
 def get_pdf_text(pdf_docs):
     text=""
     for pdf in pdf_docs:
