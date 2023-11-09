@@ -49,7 +49,7 @@ def input_fields():
 
 def boot():
     input_fields()
-    st.sidebar:
+    with st.sidebar:
         st.button("Process",on_click=process_documents())
     if "messages" not in st.session_state:
         st.session_state.messages=[]
