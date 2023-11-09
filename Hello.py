@@ -27,7 +27,7 @@ def get_text_chunks(text):
     return chunks
 
 def embeddings_on_local_vectordb(texts):
-    vectordb = Chroma.from_documents(texts, embedding=OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY),
+    vectordb = FAISS.from_documents(texts, embedding=OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY),
                                      persist_directory=LOCAL_VECTOR_STORE_DIR.as_posix())
     vectordb.persist()
     retriever = vectordb.as_retriever(search_kwargs={'k': 7})
