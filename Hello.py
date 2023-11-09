@@ -1,4 +1,5 @@
 import streamlit as st
+from pathlib import Path
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS,Chroma
