@@ -8,6 +8,6 @@ pypdf2
 langchain
 faiss-cpu
 pathlib
+sqlite3 >= 3.35.0.
 chromadb
 tiktoken
-sqlite3 >= 3.35.0.
