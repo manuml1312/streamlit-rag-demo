@@ -8,6 +8,7 @@ from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 import os
+import openai
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 openai.api_key= st.secrets.openai_api # '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'
