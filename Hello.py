@@ -33,8 +33,8 @@ def model(vector_store):
     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
     return conversation_chain
 
-def user_input(user_question):
-    response = st.session_state.conversation({'question': user_question})
+def user_input(u_q):
+    response = st.session_state.conversation({'question': u_q})
     st.session_state.chatHistory = response['chat_history']
     for i, message in enumerate(st.session_state.chatHistory):
         if i%2 == 0:
@@ -65,6 +65,6 @@ user_question = st.text_input("Learn about our Products and Materials",placehold
 
 if user_question:
     user_input(user_question)
-    with st.spinner("Thinking"):
-        st.session_state.conversation = model(vector_store)
-        st.success("Done")
+with st.spinner("Thinking"):
+    st.session_state.conversation = model(vector_store)
+    st.success("Done")
