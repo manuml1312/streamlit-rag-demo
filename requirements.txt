@@ -7,3 +7,4 @@ openai
 pypdf2
 langchain
 faiss-cpu
+llama_index
