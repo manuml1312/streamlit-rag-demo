@@ -51,8 +51,8 @@ def query_llm(retriever,query):
 def boot():
     with st.sidebar:
         pdf_docs=st.file_uploader(label="Upload the relevant documents for querying",type="pdf",accept_multiple_files=True)
-        st.button("Process"):
-            st.thinker("Processing"):
+        if st.button("Process"):
+            with st.thinker("Processing"):
                 text= get_pdf_text(pdf_docs)
                 chunks=get_text_chunks(text)
                 st.session_state.retriever=get_vector_store(chunks)
