@@ -9,3 +9,4 @@ langchain
 faiss-cpu
 pathlib
 chromadb
+sqlite3
