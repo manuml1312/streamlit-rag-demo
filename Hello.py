@@ -34,7 +34,7 @@ def model(vector_store):
     return conversation_chain
 
 def user_input(u_q):
-    response = st.session_state.conversation.append({'question': u_q})
+    response = st.session_state.conversation({'question': u_q})
     st.session_state.chatHistory = response['chat_history']
     for i, message in enumerate(st.session_state.chatHistory):
         if i%2 == 0:
@@ -46,10 +46,10 @@ def user_input(u_q):
 st.set_page_config("Retrieve Info")
 st.header("Covestro LLM Powered Chatbot")
 
-if "conversation" not in st.session_state:
-    st.session_state.conversation = None
-if "chatHistory" not in st.session_state:
-    st.session_state.chatHistory = None
+# if "conversation" not in st.session_state:
+#     st.session_state.conversation.append({"role":"user","content":
+# if "chatHistory" not in st.session_state:
+#     st.session_state.chatHistory = None
 
 with st.sidebar:
     st.title("SoothsayerAnalytics")
