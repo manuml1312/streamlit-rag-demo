@@ -69,9 +69,6 @@ def main():
                 st.session_state.conversation = get_conversational_chain(vector_store)
                 st.success("Done")
 
-with st.sidebar:
-
-
 
 if __name__ == "__main__":
     main()
