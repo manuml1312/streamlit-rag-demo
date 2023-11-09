@@ -39,16 +39,19 @@ def get_conversational_chain(vector_store):
 def user_input(user_question):
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chatHistory = response['chat_history']
-    for message in st.session_state.chatHistory:
-            st.write({"human":user_question,"Bot: ", message.content})
+    # for i, message in enumerate(st.session_state.chatHistory):
+    #     if i%2 == 0:
+    #         st.write("Human: ", message.content)
+    #     else:
+    #         st.write("Bot: ", message.content)
 def main():
     st.set_page_config("Chat with Multiple PDFs")
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
     if "conversation" not in st.session_state:
-        st.session_state.conversation = None
+        st.session_state.conversation = []
     if "chatHistory" not in st.session_state:
-        st.session_state.chatHistory = None
+        st.session_state.chatHistory = []
     if user_question:
         user_input(user_question)
     with st.sidebar:
@@ -61,7 +64,9 @@ def main():
                 text_chunks = get_text_chunks(raw_text)
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
+                st.write(st.session_state.conversation.response)
                 st.success("Done")
+
 
 
 if __name__ == "__main__":
