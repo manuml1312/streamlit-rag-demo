@@ -7,3 +7,4 @@ llama_index
 openai
 pypdf2
 langchain
+faiss
