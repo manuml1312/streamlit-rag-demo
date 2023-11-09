@@ -68,5 +68,6 @@ if user_question :=st.text_input("Learn about our Products and Materials",placeh
 if user_question:
     user_input(user_question)
 with st.spinner("Thinking"):
+    vector_store=text(pdf_docs)
     st.session_state.conversation = model(vector_store)
     st.success("Done")
