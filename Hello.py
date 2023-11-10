@@ -24,7 +24,7 @@ def get_text_chunks(text):
     return chunks
 
 def get_vector_store(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
+    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY,request_timeout=120)
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     return vector_store
 
