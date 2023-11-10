@@ -1,5 +1,5 @@
 import streamlit as st
-# from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader
 from langchain.document_loaders import PDFMinerLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
@@ -8,11 +8,12 @@ from langchain.memory import ConversationBufferMemory
 import os
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
+import pathlib
 
 OPENAI_API_KEY= st.secrets.openai_api
 
-def get_pdf_text(pdf_docs):
-    pdf_reader= PDFMinerLoader(pdf_docs)
+def get_pdf_text(file_path):
+    pdf_reader= PDFMinerLoader(file_path)
     text=loader.load()
     return  text
 
@@ -40,6 +41,13 @@ def user_input(user_question):
             st.write("Human: ", message.content)
         else:
             st.write("Bot: ", message.content)
+
+
+parent_path = pathlib.Path(__file__).parent.parent.resolve()
+data_path = os.path.join(parent_path, "data")
+
+uploaded_file = st.file_uploader("Upload a dataset", type=["pdf"])
+
 def main():
     st.set_page_config("Chat with Multiple PDFs")
     st.header("LLM Powered Chatbot")
@@ -54,15 +62,17 @@ def main():
         st.title("SoothsayerAnalytics")
         #st.subheader("Upload your Documents Here")
         pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
+        if uploaded_file is not None:
+            st.write("File Uploaded Successfully!")
+    # Get the file location
+            file_location = os.path.join(data_path, uploaded_file.name)
         if st.button("Process"):
             with st.spinner("Processing"):
-                raw_text = get_pdf_text(pdf_docs)
+                raw_text = get_pdf_text(file_location)
                 text_chunks = get_text_chunks(raw_text)
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
                 st.success("Done")
-
-
 
 if __name__ == "__main__":
     main()
