@@ -9,15 +9,30 @@ from langchain.chat_models import ChatOpenAI
 
 OPENAI_API_KEY = st.secrets.openai_api
 
+import streamlit as st
+import tempfile
+import os
+
 def get_pdf_text(pdf_docs):
     text = ""
     if pdf_docs is not None:  # Ensure a file is uploaded
         try:
-            loader = PDFMinerLoader(pdf_docs)
+            # Save the uploaded file to a temporary location
+            temp_dir = tempfile.TemporaryDirectory()
+            temp_path = os.path.join(temp_dir.name, pdf_docs.name)
+            with open(temp_path, "wb") as f:
+                f.write(pdf_docs.read())
+
+            # Load the PDF using PDFMinerLoader
+            loader = PDFMinerLoader(temp_path)
             text = loader.load()
         except Exception as e:
             st.error(f"Error loading PDF: {e}")
+        finally:
+            temp_dir.cleanup()  # Clean up temporary directory
+
     return text
+
 
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
