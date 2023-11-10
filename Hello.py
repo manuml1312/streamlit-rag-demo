@@ -18,7 +18,7 @@ there queries about the materials and its uses from the document supplied.Keep t
                    facts – do not hallucinate features.""")
 
 # File uploader for PDF
-pdf_file = st.file_uploader("Upload PDF Document", type=["pdf","txt","docx"])
+pdf_file = st.file_uploader("Upload PDF Document", type=["pdf","txt"])
 
 if pdf_file:
     # Read the content of the uploaded PDF in binary mode
