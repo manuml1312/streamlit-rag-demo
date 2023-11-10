@@ -22,19 +22,14 @@ there queries about the materials and its uses from the document supplied.Keep t
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf","txt"])
 
 if pdf_file:
-    # Read the content of the uploaded PDF in binary mode
-    with pdf_file as file:
-        pdf_content = file.read()
-    document = Document(text=pdf_content, filename=pdf_file.name)
-    documents = [document]
-elif pdf_file:
+    # Read the content of the uploaded PDF using PyMuPDF
     pdf_document = fitz.open(pdf_file)
     pdf_content = ""
     for page_num in range(pdf_document.page_count):
         page = pdf_document[page_num]
-        pdf_content += page.get_text()
+        pdf_content += page.get_text("text")
 
-    document = Document(text=pdf_content, filename=pdf_file.name)
+    document = Document(text=pdf_content.decode('latin-1'), filename=pdf_file.name)
     documents = [document]
 else:
     documents=[]
