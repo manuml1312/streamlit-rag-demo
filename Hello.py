@@ -4,6 +4,7 @@ from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index import ServiceContext
 from llama_index.llms import OpenAI
 import openai
+import fitz
 openai.api_key = st.secrets.openai_key 
 
 st.title("📝 Covestro Material Guide Chatbot ")
@@ -26,8 +27,18 @@ if pdf_file:
         pdf_content = file.read()
     document = Document(text=pdf_content, filename=pdf_file.name)
     documents = [document]
+elif pdf_file:
+    pdf_document = fitz.open(pdf_file)
+    pdf_content = ""
+    for page_num in range(pdf_document.page_count):
+        page = pdf_document[page_num]
+        pdf_content += page.get_text()
+
+    document = Document(text=pdf_content, filename=pdf_file.name)
+    documents = [document]
 else:
-    documents = []
+    documents=[]
+    
 
 service_context = ServiceContext.from_defaults(llm=llm)
 index = VectorStoreIndex.from_documents(documents, service_context=service_context)
