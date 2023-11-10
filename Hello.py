@@ -12,7 +12,6 @@ from langchain.chat_models import ChatOpenAI
 OPENAI_API_KEY= st.secrets.openai_api
 
 def get_pdf_text(pdf_docs):
-    text=""
     pdf_reader= PDFMinerLoader(pdf_docs)
     text=loader.load()
     return  text
