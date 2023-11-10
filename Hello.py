@@ -43,10 +43,9 @@ def user_input(user_question):
             st.write("Bot: ", message.content)
 
 
-parent_path = pathlib.Path(__file__).parent.parent.resolve()
-data_path = os.path.join(parent_path, "data")
 
-uploaded_file = st.file_uploader("Upload a dataset", type=["pdf"])
+
+# uploaded_file = st.file_uploader("Upload a dataset", type=["pdf"])
 
 def main():
     st.set_page_config("Chat with Multiple PDFs")
@@ -60,6 +59,8 @@ def main():
         user_input(user_question)
     with st.sidebar:
         st.title("SoothsayerAnalytics")
+        parent_path = pathlib.Path(__file__).parent.parent.resolve()
+        data_path = os.path.join(parent_path, "data")
         uploaded_file = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
         if uploaded_file is not None:
             st.write("File Uploaded Successfully!")
