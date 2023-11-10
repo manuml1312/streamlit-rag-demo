@@ -54,7 +54,6 @@ def get_text_chunks(text):
 
 
 def get_vector_store(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, request_timeout=120)
     embeddings.update_forward_refs()
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     return vector_store
@@ -99,6 +98,7 @@ def main():
             if pdf_docs is not None:
                 with st.spinner("Processing"):
                     raw_text = get_pdf_text(pdf_docs)
+                    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, request_timeout=120)
                     text_chunks = get_text_chunks(raw_text)
                     vector_store = get_vector_store(text_chunks)
                     st.session_state.conversation = get_conversational_chain(vector_store)
