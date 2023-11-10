@@ -4,7 +4,7 @@ pandas
 pydeck
 streamlit
 openai
-pypdf2
+pdfminer.six
 langchain
 faiss-cpu
 pathlib
