@@ -1,5 +1,6 @@
 import streamlit as st
-from PyPDF2 import PdfReader
+# from PyPDF2 import PdfReader
+from langchain.document_loaders import PDFMinerLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
@@ -12,10 +13,8 @@ OPENAI_API_KEY= st.secrets.openai_api
 
 def get_pdf_text(pdf_docs):
     text=""
-    for pdf in pdf_docs:
-        pdf_reader= PdfReader(pdf)
-        for page in pdf_reader.pages:
-            text+= page.extract_text()
+    pdf_reader= PDFMinerLoader(pdf_docs)
+    text=loader.load()
     return  text
 
 def get_text_chunks(text):
