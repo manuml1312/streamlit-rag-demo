@@ -1,9 +1,6 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-#import google.generativeai as palm
-from langchain.embeddings import GooglePalmEmbeddings
-from langchain.llms import GooglePalm
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
@@ -50,9 +47,9 @@ def main():
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
     if "conversation" not in st.session_state:
-        st.session_state.conversation = []
+        st.session_state.conversation = None
     if "chatHistory" not in st.session_state:
-        st.session_state.chatHistory = []
+        st.session_state.chatHistory = None
     if user_question:
         user_input(user_question)
     with st.sidebar:
@@ -65,7 +62,6 @@ def main():
                 text_chunks = get_text_chunks(raw_text)
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
-                st.write(st.session_state.conversation.response)
                 st.success("Done")
 
 
