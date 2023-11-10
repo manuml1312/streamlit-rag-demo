@@ -3,6 +3,7 @@ from llama_index import VectorStoreIndex, SimpleDirectoryReader, Document
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index import ServiceContext
 from llama_index.llms import OpenAI
+import openai
 openai.api_key = st.secrets.openai_key 
 
 st.title("📝 Covestro Material Guide Chatbot ")
