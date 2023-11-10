@@ -8,7 +8,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 
 OPENAI_API_KEY = st.secrets.openai_api
-
+import re
 import streamlit as st
 import tempfile
 import os
@@ -33,11 +33,18 @@ def get_pdf_text(pdf_docs):
 
     return text
 
-
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
+    
+    # Ensure that _separator is a valid regex pattern
+    _separator = text_splitter._separators
+    if not _separator:
+        st.error("Invalid separator pattern in RecursiveCharacterTextSplitter.")
+        return []
+
     chunks = text_splitter.split_text(text)
     return chunks
+
 
 def get_vector_store(text_chunks):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, request_timeout=120)
