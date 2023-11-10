@@ -60,11 +60,9 @@ def main():
         user_input(user_question)
     with st.sidebar:
         st.title("SoothsayerAnalytics")
-        #st.subheader("Upload your Documents Here")
-        pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
+        uploaded_file = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
         if uploaded_file is not None:
             st.write("File Uploaded Successfully!")
-    # Get the file location
             file_location = os.path.join(data_path, uploaded_file.name)
         if st.button("Process"):
             with st.spinner("Processing"):
