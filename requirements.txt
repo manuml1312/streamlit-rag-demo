@@ -3,8 +3,12 @@ numpy
 pandas
 pydeck
 streamlit
-pdfminer.six
-langchain
-faiss-cpu
-pathlib
+llama_index 
+transformers 
+pypdf 
+replicate
+torch
+tensorflow
+flax
+llama_hub
 openai
