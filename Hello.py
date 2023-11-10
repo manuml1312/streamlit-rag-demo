@@ -55,7 +55,7 @@ def main():
     with st.sidebar:
         st.title("SoothsayerAnalytics")
         #st.subheader("Upload your Documents Here")
-        pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", accept_multiple_files=True)
+        pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
         if st.button("Process"):
             with st.spinner("Processing"):
                 raw_text = get_pdf_text(pdf_docs)
