@@ -6,7 +6,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
-
+os.environ['OPENAI_API_KEY']=st.secrets.openai_api
 OPENAI_API_KEY = st.secrets.openai_api
 import re
 import streamlit as st
