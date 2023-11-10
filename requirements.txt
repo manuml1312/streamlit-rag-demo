@@ -3,9 +3,8 @@ numpy
 pandas
 pydeck
 streamlit
-openai
 pdfminer.six
 langchain
 faiss-cpu
 pathlib
-tiktoken
+openai
