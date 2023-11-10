@@ -21,8 +21,9 @@ there queries about the materials and its uses from the document supplied.Keep t
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf"])
 
 if pdf_file:
-    # Read the content of the uploaded PDF
-    pdf_content = pdf_file.read()
+    # Read the content of the uploaded PDF in binary mode
+    with pdf_file as file:
+        pdf_content = file.read()
     document = Document(text=pdf_content, filename=pdf_file.name)
     documents = [document]
 else:
