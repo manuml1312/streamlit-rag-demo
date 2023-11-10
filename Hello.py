@@ -67,7 +67,7 @@ def main():
             file_location = os.path.join(data_path, uploaded_file.name)
         if st.button("Process"):
             with st.spinner("Processing"):
-                raw_text = get_pdf_text(file_location)
+                raw_text = get_pdf_text(str(file_location))
                 text_chunks = get_text_chunks(raw_text)
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
