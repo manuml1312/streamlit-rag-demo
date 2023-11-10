@@ -10,8 +10,13 @@ from langchain.chat_models import ChatOpenAI
 OPENAI_API_KEY = st.secrets.openai_api
 
 def get_pdf_text(pdf_docs):
-    loader = PDFMinerLoader(pdf_docs)
-    text = loader.load()
+    text = ""
+    if pdf_docs is not None:  # Ensure a file is uploaded
+        try:
+            loader = PDFMinerLoader(pdf_docs)
+            text = loader.load()
+        except Exception as e:
+            st.error(f"Error loading PDF: {e}")
     return text
 
 def get_text_chunks(text):
