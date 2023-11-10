@@ -33,6 +33,8 @@ def get_pdf_text(pdf_docs):
 
     return text
 
+import re
+
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
     
@@ -40,6 +42,11 @@ def get_text_chunks(text):
     _separator = text_splitter._separators
     if not _separator:
         st.error("Invalid separator pattern in RecursiveCharacterTextSplitter.")
+        return []
+
+    # Ensure that text is a string
+    if not isinstance(text, (str, bytes)):
+        st.error("Invalid text format. Expected string or bytes-like object.")
         return []
 
     chunks = text_splitter.split_text(text)
