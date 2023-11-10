@@ -1,68 +1,47 @@
 import streamlit as st
-from langchain.document_loaders import PDFMinerLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
+from llama_index import VectorStoreIndex, SimpleDirectoryReader, Document
+from llama_index.embeddings import HuggingFaceEmbedding
+from llama_index import ServiceContext
+from llama_index.llms import OpenAI
+openai.api_key = st.secrets.openai_key 
 
-# Replace 'YOUR_OPENAI_API_KEY' with your actual OpenAI API key
-OPENAI_API_KEY = st.secrets.openai_api
+st.title("📝 Covestro Material Guide Chatbot ")
 
-# Configure Streamlit page
-st.set_page_config(page_title="RAG Application", layout="wide")
+if "messages" not in st.session_state.keys():  # Initialize the chat messages history
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Mention your queries!"}
+    ]
 
-def get_pdf_text(pdf_docs):
-    text = ""
-    if pdf_docs is not None:
-        try:
-            loader = PDFMinerLoader(pdf_docs)
-            text = loader.load()
-        except Exception as e:
-            st.error(f"Error loading PDF: {e}")
-    return text
+llm = OpenAI(model="gpt-3.5-turbo", temperature=0.3, system_prompt="""You are a chatbot to help users select materials.Answer
+there queries about the materials and its uses from the document supplied.Keep the answers technical and in detail dont summarise. Keep your answers accurate and based on 
+                   facts – do not hallucinate features.""")
 
-def get_text_chunks(text):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
-    chunks = text_splitter.split_text(text)
-    return chunks
+# File uploader for PDF
+pdf_file = st.file_uploader("Upload PDF Document", type=["pdf"])
 
-def get_vector_store(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, request_timeout=120)
-    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
-    return vector_store
+if pdf_file:
+    # Read the content of the uploaded PDF
+    pdf_content = pdf_file.read()
+    document = Document(text=pdf_content, filename=pdf_file.name)
+    documents = [document]
+else:
+    documents = []
 
-def get_conversational_chain(vector_store):
-    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
-    return conversation_chain
+service_context = ServiceContext.from_defaults(llm=llm)
+index = VectorStoreIndex.from_documents(documents, service_context=service_context)
 
-def main():
-    st.title("RAG Application with OpenAI")
-    user_question = st.text_input("Ask a Question:")
-    
-    if st.button("Generate Response"):
-        if user_question:
-            with st.spinner("Processing..."):
-                response = st.session_state.conversation({'question': user_question})
-                st.session_state.chatHistory = response['chat_history']
-                for message in st.session_state.chatHistory:
-                    st.write(f"{message.role.capitalize()}: {message.content}")
+if "chat_engine" not in st.session_state.keys():  # Initialize the chat engine
+    st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
 
-    with st.sidebar:
-        st.title("Document Input")
-        pdf_docs = st.file_uploader("Upload PDF Document", type=["pdf"])
-        
-        if st.button("Process Documents"):
-            if pdf_docs is not None:
-                with st.spinner("Processing Documents..."):
-                    raw_text = get_pdf_text(pdf_docs)
-                    text_chunks = get_text_chunks(raw_text)
-                    vector_store = get_vector_store(text_chunks)
-                    st.session_state.conversation = get_conversational_chain(vector_store)
-                    st.success("Document Processing Complete")
+# If prompt is provided, save it to chat history
+prompt = st.text_input("How can I help you today?", placeholder="Your query here", disabled=not documents)
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-if __name__ == "__main__":
-    main()
+# If the last message is not from the assistant, generate a new response
+if st.session_state.messages[-1]["role"] != "assistant":
+    with st.spinner("Thinking..."):
+        response = st.session_state.chat_engine.chat(prompt)
+        st.write(response.response)
+        message = {"role": "assistant", "content": response.response}
+        st.session_state.messages.append(message)
