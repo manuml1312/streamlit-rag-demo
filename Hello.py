@@ -74,8 +74,8 @@ def main():
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation = get_conversational_chain(vector_store)
                 st.success("Done")
-        if st.button("Clear Chat"):
-            st.session_state.conversation= None
+        # if st.button("Clear Chat"):
+        #     st.session_state.conversation= None
 
 if __name__ == "__main__":
     main()
