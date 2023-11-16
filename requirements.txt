@@ -3,7 +3,5 @@ numpy
 pandas
 pydeck
 streamlit
-llama_index 
-PyPDF2
-llama_hub
 openai
+langchain
