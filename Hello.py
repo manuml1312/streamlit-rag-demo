@@ -7,6 +7,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 import tempfile
+import os
 
 OPENAI_API_KEY = st.secrets.openai_api
 
