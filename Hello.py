@@ -11,8 +11,18 @@ OPENAI_API_KEY = st.secrets.openai_api
 
 def get_pdf_text(pdf_docs):
     text = ""
-    pdf_reader = PDFMinerLoader(pdf_docs)
-    text = pdf_reader.load()  # Corrected from loader.load()
+    # Save the uploaded PDF to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        temp_file.write(pdf_docs.read())
+        temp_file_path = temp_file.name
+
+    # Use the temporary file path with PDFMinerLoader
+    pdf_reader = PDFMinerLoader(temp_file_path)
+    text = pdf_reader.load()
+
+    # Remove the temporary file
+    os.remove(temp_file_path)
+
     return text
 
 def get_text_chunks(text):
