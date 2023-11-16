@@ -1,64 +1,69 @@
 import streamlit as st
-from llama_index import VectorStoreIndex, ServiceContext
-from llama_index.llms import OpenAI
-from PyPDF2 import PdfReader
-import openai
+# from PyPDF2 import PdfReader
+from langchain.document_loaders import PDFMinerLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import FAISS
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+import os
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.chat_models import ChatOpenAI
 
-# Set OpenAI API key from Streamlit Secrets Manager
-openai.api_key = st.secrets.openai_key
+OPENAI_API_KEY= st.secrets.openai_api
 
-st.title("📝 Covestro Material Guide Chatbot ")
+def get_pdf_text(pdf_docs):
+    text=""
+    pdf_reader= PDFMinerLoader(pdf_docs)
+    text=loader.load()
+    return  text
 
-# Initialize the chat messages history
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Mention your queries!"}]
+def get_text_chunks(text):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
+    chunks = text_splitter.split_text(text)
+    return chunks
 
-# Initialize OpenAI model
-llm = OpenAI(
-    model="gpt-3.5-turbo",
-    temperature=0.3,
-    system_prompt="""You are a chatbot to help users select materials.Answer
-    their queries about the materials and its uses from the document supplied.
-    Keep the answers technical and in detail; don't summarize. Keep your answers accurate and based on 
-    facts – do not hallucinate features."""
-)
-class Document:
-    def __init__(self, doc_id, content):
-        self.doc_id = doc_id
-        self.content = content
+def get_vector_store(text_chunks):
+    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY,request_timeout=120)
+    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+    return vector_store
 
-    def get_doc_id(self):
-        return self.doc_id
-        
-# File uploader for PDF
-pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
+def get_conversational_chain(vector_store):
+    llm = ChatOpenAI(openai_api_key = OPENAI_API_KEY)
+    memory = ConversationBufferMemory(memory_key = "chat_history", return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
+    return conversation_chain
 
-if pdf_file:
-    pdf_document = PdfReader(pdf_file)
-    pdf_documents = []
+def user_input(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chatHistory = response['chat_history']
+    for i, message in enumerate(st.session_state.chatHistory):
+        if i%2 == 0:
+            st.write("Human: ", message.content)
+        else:
+            st.write("Bot: ", message.content)
+def main():
+    st.set_page_config("Chat with Multiple PDFs")
+    st.header("LLM Powered Chatbot")
+    user_question = st.text_input("Ask a Question from the uploaded file")
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chatHistory" not in st.session_state:
+        st.session_state.chatHistory = None
+    if user_question:
+        user_input(user_question)
+    with st.sidebar:
+        st.title("SoothsayerAnalytics")
+        #st.subheader("Upload your Documents Here")
+        pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
+        if st.button("Process"):
+            with st.spinner("Processing"):
+                raw_text = get_pdf_text(pdf_docs)
+                text_chunks = get_text_chunks(raw_text)
+                vector_store = get_vector_store(text_chunks)
+                st.session_state.conversation = get_conversational_chain(vector_store)
+                st.success("Done")
 
-    for page_num, page in enumerate(pdf_document.pages):
-        page_text = page.extract_text()
-        doc = {"doc_id": f"Page {page_num + 1}", "content": page_text}
-        pdf_documents.append(doc)
 
-    service_context = ServiceContext.from_defaults(llm=llm)
-    documents = [Document(doc["doc_id"], doc["content"]) for doc in pdf_documents]
-    index = VectorStoreIndex.from_documents(pdf_documents, service_context=service_context)
 
-    # Initialize the chat engine
-    if "chat_engine" not in st.session_state:
-        st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
-
-    # User input
-    prompt = st.text_input("How can I help you today?", placeholder="Your query here", key="user_input")
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
-    # Generate a new response if the last message is not from the assistant
-    if st.session_state.messages[-1]["role"] != "assistant":
-        with st.spinner("Thinking..."):
-            response = st.session_state.chat_engine.chat(prompt)
-            st.write(response.response)
-            message = {"role": "assistant", "content": response.response}
-            st.session_state.messages.append(message)
+if __name__ == "__main__":
+    main()
