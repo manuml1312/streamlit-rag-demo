@@ -45,13 +45,14 @@ def get_conversational_chain(vector_store):
     return conversation_chain
 
 def user_input(user_question, conversation_dict):
-    response = conversation_dict['conversation_chain'].respond({'question': user_question})
-    conversation_dict['chat_history'].extend(response['chat_history'])
-    st.session_state.conversation_dict = conversation_dict
+    if conversation_dict is not None and conversation_dict['conversation_chain'] is not None:
+        response = conversation_dict['conversation_chain'].respond({'question': user_question})
+        conversation_dict['chat_history'].extend(response['chat_history'])
+        st.session_state.conversation_dict = conversation_dict
 
 def clear_chat():
     st.session_state.conversation_dict['chat_history'] = []
-    st.session_state.conversation_dict['conversation_chain'].forget()
+    st.session_state.conversation_dict['conversation_chain'] = get_conversational_chain(get_vector_store([]))
     st.session_state.conversation_dict = None
 
 def main():
@@ -60,7 +61,10 @@ def main():
     user_question = st.text_input("Ask a Question from the uploaded file")
     
     if "conversation_dict" not in st.session_state:
-        st.session_state.conversation_dict = None
+        st.session_state.conversation_dict = {
+            'conversation_chain': get_conversational_chain(get_vector_store([])),
+            'chat_history': [],
+        }
 
     if user_question:
         user_input(user_question, st.session_state.conversation_dict)
