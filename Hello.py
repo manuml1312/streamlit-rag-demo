@@ -1,6 +1,6 @@
 import streamlit as st
 from llama_index import VectorStoreIndex, SimpleDirectoryReader, Document
-from PyPDF2 import PdfReader  # Fixed the typo in PyPDF2
+from PyPDF2 import PdfFileReader  # Fixed the typo in PyPDF2
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index import ServiceContext
 from llama_index.llms import OpenAI
