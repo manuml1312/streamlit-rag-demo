@@ -1,59 +1,52 @@
 import streamlit as st
-from llama_index import VectorStoreIndex, SimpleDirectoryReader
-from PyPDF2 import PdfReader  # Fixed the typo in PyPDF2
-from llama_index.embeddings import HuggingFaceEmbedding
-from llama_index import ServiceContext
+from llama_index import VectorStoreIndex, ServiceContext
 from llama_index.llms import OpenAI
-import openai
+from PyPDF2 import PdfReader
 
 # Set OpenAI API key from Streamlit Secrets Manager
 openai.api_key = st.secrets.openai_key
 
 st.title("📝 Covestro Material Guide Chatbot ")
 
-if "messages" not in st.session_state.keys():  # Initialize the chat messages history
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Mention your queries!"}
-    ]
+# Initialize the chat messages history
+if "messages" not in st.session_state:
+    st.session_state.messages = [{"role": "assistant", "content": "Mention your queries!"}]
 
-llm = OpenAI(model="gpt-3.5-turbo", temperature=0.3, system_prompt="""You are a chatbot to help users select materials.Answer
-there queries about the materials and its uses from the document supplied.Keep the answers technical and in detail dont summarise. Keep your answers accurate and based on 
-                   facts – do not hallucinate features.""")
+# Initialize OpenAI model
+llm = OpenAI(
+    model="gpt-3.5-turbo",
+    temperature=0.3,
+    system_prompt="""You are a chatbot to help users select materials.Answer
+    their queries about the materials and its uses from the document supplied.
+    Keep the answers technical and in detail; don't summarize. Keep your answers accurate and based on 
+    facts – do not hallucinate features."""
+)
 
-class Document:
-    def __init__(self, doc_id, content):
-        self.doc_id = doc_id
-        self.content = content
-        self.hash = hash(content)
-pdf_documents = []
 # File uploader for PDF
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
+
 if pdf_file:
     pdf_document = PdfReader(pdf_file)
-    pdf_content = ""
-    for page_num in range(len(pdf_document.pages)):
-        page = pdf_document.pages[page_num]
-        pdf_content += page.extract_text()
+    pdf_documents = []
 
-    # Create a Document object for each page
-    for page_num in range(len(pdf_document.pages)):
-        page = pdf_document.pages[page_num]
+    for page_num, page in enumerate(pdf_document.pages):
         page_text = page.extract_text()
-        doc = Document(f"Page {page_num + 1}", page_text)  # Use a unique identifier for the document
+        doc = {"doc_id": f"Page {page_num + 1}", "content": page_text}
         pdf_documents.append(doc)
 
     service_context = ServiceContext.from_defaults(llm=llm)
     index = VectorStoreIndex.from_documents(pdf_documents, service_context=service_context)
 
-    if "chat_engine" not in st.session_state.keys():  # Initialize the chat engine
+    # Initialize the chat engine
+    if "chat_engine" not in st.session_state:
         st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
 
-# If prompt is provided, save it to chat history
+    # User input
     prompt = st.text_input("How can I help you today?", placeholder="Your query here", key="user_input")
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-# If the last message is not from the assistant, generate a new response
+    # Generate a new response if the last message is not from the assistant
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.spinner("Thinking..."):
             response = st.session_state.chat_engine.chat(prompt)
