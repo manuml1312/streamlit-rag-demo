@@ -43,9 +43,8 @@ def main():
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
     
-    if "conversation_chain" not in st.session_state:
+    if "conversation_chain" not in st.session_state or st.session_state.conversation_chain is None:
         st.session_state.conversation_chain = None
-    if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
 
     if user_question:
@@ -61,6 +60,7 @@ def main():
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation_chain = get_conversational_chain(vector_store)
                 st.success("Done")
+
 
 if __name__ == "__main__":
     main()
