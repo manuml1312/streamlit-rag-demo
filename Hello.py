@@ -1,5 +1,5 @@
 import streamlit as st
-from llama_index import VectorStoreIndex, SimpleDirectoryReader, Document
+from llama_index import VectorStoreIndex, SimpleDirectoryReader
 from PyPDF2 import PdfReader  # Fixed the typo in PyPDF2
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index import ServiceContext
@@ -19,6 +19,12 @@ if "messages" not in st.session_state.keys():  # Initialize the chat messages hi
 llm = OpenAI(model="gpt-3.5-turbo", temperature=0.3, system_prompt="""You are a chatbot to help users select materials.Answer
 there queries about the materials and its uses from the document supplied.Keep the answers technical and in detail dont summarise. Keep your answers accurate and based on 
                    facts – do not hallucinate features.""")
+
+class Document:
+    def __init__(self, doc_id, content):
+        self.doc_id = doc_id
+        self.content = content
+        self.hash = hash(content)
 
 # File uploader for PDF
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
