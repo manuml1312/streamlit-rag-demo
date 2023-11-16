@@ -6,3 +6,4 @@ streamlit
 openai
 langchain
 pdfminer.six
+faiss-cpu
