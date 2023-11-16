@@ -44,11 +44,34 @@ def get_conversational_chain(vector_store):
     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
     return conversation_chain
 
+def user_input(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chatHistory = response['chat_history']
+    for i, message in enumerate(st.session_state.chatHistory):
+        if i%2 == 0:
+            st.write("Human: ", message.content)
+        else:
+            st.write("Bot: ", message.content)
+
 def user_input(user_question, conversation_dict):
     if conversation_dict is not None and conversation_dict['conversation_chain'] is not None:
-        response = conversation_dict['conversation_chain'].chat({'question': user_question})
-        conversation_dict['chat_history'].extend(response['chat_history'])
+        prompt = f"Human: {user_question}\nAI:"
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_question},
+                {"role": "assistant", "content": conversation_dict['chat_history'][-1].content},  # Use the last assistant message
+            ],
+        )
+        bot_reply = response['choices'][0]['message']['content']
+        conversation_dict['chat_history'].append({"role": "assistant", "content": bot_reply})
         st.session_state.conversation_dict = conversation_dict
+
+        # Display the conversation
+        for i, message in enumerate(conversation_dict['chat_history']):
+            role = "Human" if i % 2 == 0 else "Bot"
+            st.write(f"{role}: {message.content}")
 
 def clear_chat():
     st.session_state.conversation_dict['chat_history'] = []
