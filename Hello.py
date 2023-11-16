@@ -1,6 +1,5 @@
 import streamlit as st
 import tempfile
-import os
 from langchain.document_loaders import PDFMinerLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
@@ -8,6 +7,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
+import os
 
 OPENAI_API_KEY = st.secrets.openai_api
 
@@ -28,11 +28,10 @@ def get_pdf_text(pdf_docs):
     return text
 
 def get_text_chunks(text):
-    text = str(text)  # Ensure text is a string
+    text = str(text)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
     chunks = text_splitter.split_text(text)
     return chunks
-
 
 def get_vector_store(text_chunks):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, request_timeout=120)
@@ -45,37 +44,47 @@ def get_conversational_chain(vector_store):
     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
     return conversation_chain
 
-def user_input(user_question):
-    response = st.session_state.conversation({'question': user_question})
-    st.session_state.chatHistory = response['chat_history']
-    for i, message in enumerate(st.session_state.chatHistory):
-        if i % 2 == 0:
-            st.write("Human: ", message.content)
-        else:
-            st.write("Bot: ", message.content)
+def user_input(user_question, conversation_dict):
+    response = conversation_dict['conversation_chain'].respond({'question': user_question})
+    conversation_dict['chat_history'].extend(response['chat_history'])
+    st.session_state.conversation_dict = conversation_dict
+
+def clear_chat():
+    st.session_state.conversation_dict['chat_history'] = []
+    st.session_state.conversation_dict['conversation_chain'].forget()
+    st.session_state.conversation_dict = None
 
 def main():
     st.set_page_config("Chat with Multiple PDFs")
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
-    if "conversation" not in st.session_state:
-        st.session_state.conversation = None
-    if "chatHistory" not in st.session_state:
-        st.session_state.chatHistory = None
+    
+    if "conversation_dict" not in st.session_state:
+        st.session_state.conversation_dict = None
+
     if user_question:
-        user_input(user_question)
+        user_input(user_question, st.session_state.conversation_dict)
+
     with st.sidebar:
         st.title("SoothsayerAnalytics")
         pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
+        
         if st.button("Process"):
             with st.spinner("Processing"):
                 raw_text = get_pdf_text(pdf_docs)
                 text_chunks = get_text_chunks(raw_text)
                 vector_store = get_vector_store(text_chunks)
-                st.session_state.conversation = get_conversational_chain(vector_store)
+                conversation_chain = get_conversational_chain(vector_store)
+                
+                st.session_state.conversation_dict = {
+                    'conversation_chain': conversation_chain,
+                    'chat_history': [],
+                }
+                
                 st.success("Done")
-        # if st.button("Clear Chat"):
-        #     st.session_state.conversation= None
+
+        if st.button("Clear Chat"):
+            clear_chat()
 
 if __name__ == "__main__":
     main()
