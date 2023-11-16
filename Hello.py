@@ -40,8 +40,8 @@ def get_vector_store(text_chunks):
     return vector_store
 
 def get_conversational_chain(vector_store):
-    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    llm = ChatOpenAI(openai_api_key = OPENAI_API_KEY)
+    memory = ConversationBufferMemory(memory_key = "chat_history", return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
     return conversation_chain
 
@@ -53,66 +53,29 @@ def user_input(user_question):
             st.write("Human: ", message.content)
         else:
             st.write("Bot: ", message.content)
-
-def user_input(user_question, conversation_dict):
-    if conversation_dict is not None and conversation_dict['conversation_chain'] is not None:
-        prompt = f"Human: {user_question}\nAI:"
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": user_question},
-                {"role": "assistant", "content": conversation_dict['chat_history'][-1].content},  # Use the last assistant message
-            ],
-        )
-        bot_reply = response['choices'][0]['message']['content']
-        conversation_dict['chat_history'].append({"role": "assistant", "content": bot_reply})
-        st.session_state.conversation_dict = conversation_dict
-
-        # Display the conversation
-        for i, message in enumerate(conversation_dict['chat_history']):
-            role = "Human" if i % 2 == 0 else "Bot"
-            st.write(f"{role}: {message.content}")
-
-def clear_chat():
-    st.session_state.conversation_dict['chat_history'] = []
-    st.session_state.conversation_dict['conversation_chain'] = get_conversational_chain(get_vector_store([]))
-    st.session_state.conversation_dict = None
-
 def main():
     st.set_page_config("Chat with Multiple PDFs")
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
-    
-    if "conversation_dict" not in st.session_state:
-        st.session_state.conversation_dict = {
-            'conversation_chain': get_conversational_chain(get_vector_store([])),
-            'chat_history': [],
-        }
-
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chatHistory" not in st.session_state:
+        st.session_state.chatHistory = None
     if user_question:
-        user_input(user_question, st.session_state.conversation_dict)
-
+        user_input(user_question)
     with st.sidebar:
         st.title("SoothsayerAnalytics")
+        #st.subheader("Upload your Documents Here")
         pdf_docs = st.file_uploader("Upload Files and Click on the Process Button", type=["pdf"])
-        
         if st.button("Process"):
             with st.spinner("Processing"):
                 raw_text = get_pdf_text(pdf_docs)
                 text_chunks = get_text_chunks(raw_text)
                 vector_store = get_vector_store(text_chunks)
-                conversation_chain = get_conversational_chain(vector_store)
-                
-                st.session_state.conversation_dict = {
-                    'conversation_chain': conversation_chain,
-                    'chat_history': [],
-                }
-                
+                st.session_state.conversation = get_conversational_chain(vector_store)
                 st.success("Done")
 
-        if st.button("Clear Chat"):
-            clear_chat()
+
 
 if __name__ == "__main__":
     main()
