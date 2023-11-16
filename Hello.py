@@ -25,7 +25,7 @@ pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
 if pdf_file:
     pdf_document = PdfReader(pdf_file)
     pdf_content = ""
-    for page_num in range(pdf_document.numPages):  # Fixed the attribute name
+    for page_num in range(len(pdf_document.pages)):  # Fixed the attribute name
         page = pdf_document.getPage(page_num)  # Fixed the attribute name
         pdf_content += page.extract_text()
 
