@@ -2,6 +2,7 @@ import streamlit as st
 from llama_index import VectorStoreIndex, ServiceContext
 from llama_index.llms import OpenAI
 from PyPDF2 import PdfReader
+import openai
 
 # Set OpenAI API key from Streamlit Secrets Manager
 openai.api_key = st.secrets.openai_key
