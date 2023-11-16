@@ -1,11 +1,13 @@
 import streamlit as st
 from llama_index import VectorStoreIndex, SimpleDirectoryReader, Document
+from PyPDF2 import PdfReader  # Fixed the typo in PyPDF2
 from llama_index.embeddings import HuggingFaceEmbedding
 from llama_index import ServiceContext
 from llama_index.llms import OpenAI
 import openai
-import fitz
-openai.api_key = st.secrets.openai_key 
+
+# Set OpenAI API key from Streamlit Secrets Manager
+openai.api_key = st.secrets.openai_key
 
 st.title("📝 Covestro Material Guide Chatbot ")
 
@@ -19,24 +21,21 @@ there queries about the materials and its uses from the document supplied.Keep t
                    facts – do not hallucinate features.""")
 
 # File uploader for PDF
-pdf_file = st.file_uploader("Upload PDF Document", type=["pdf","txt"])
-pdf_document = fitz.open(pdf_file)
+pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
+pdf_document = PdfReader(pdf_file)
 pdf_content = ""
-for page_num in range(pdf_document.page_count):
-    page = pdf_document[page_num]
-    pdf_content += page.get_text("text")
+for page_num in range(pdf_document.numPages):  # Fixed the attribute name
+    page = pdf_document.getPage(page_num)  # Fixed the attribute name
+    pdf_content += page.extract_text()
 
-document = Document(text=pdf_content.decode('latin-1'), filename=pdf_file.name)
-documents = [document]
-    
 service_context = ServiceContext.from_defaults(llm=llm)
-index = VectorStoreIndex.from_documents(documents, service_context=service_context)
+index = VectorStoreIndex.from_documents(pdf_content, service_context=service_context)
 
 if "chat_engine" not in st.session_state.keys():  # Initialize the chat engine
     st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
 
 # If prompt is provided, save it to chat history
-prompt = st.text_input("How can I help you today?", placeholder="Your query here", disabled=not documents)
+prompt = st.text_input("How can I help you today?", placeholder="Your query here", key="user_input")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
