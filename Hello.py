@@ -22,7 +22,7 @@ there queries about the materials and its uses from the document supplied.Keep t
 
 # File uploader for PDF
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
-pdf_document = PdfReader(pdf_file)
+pdf_document = PdfFileReader(pdf_file)
 pdf_content = ""
 for page_num in range(pdf_document.numPages):  # Fixed the attribute name
     page = pdf_document.getPage(page_num)  # Fixed the attribute name
