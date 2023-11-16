@@ -36,6 +36,7 @@ if pdf_file:
         pdf_documents.append(doc)
 
     service_context = ServiceContext.from_defaults(llm=llm)
+    documents = [Document(doc["doc_id"], doc["content"]) for doc in pdf_documents]
     index = VectorStoreIndex.from_documents(pdf_documents, service_context=service_context)
 
     # Initialize the chat engine
