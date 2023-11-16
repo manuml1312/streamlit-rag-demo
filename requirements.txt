@@ -4,12 +4,6 @@ pandas
 pydeck
 streamlit
 llama_index 
-transformers 
 pypdf 
-replicate
-torch
-tensorflow
-flax
 llama_hub
 openai
-pymupdf
