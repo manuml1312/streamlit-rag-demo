@@ -4,6 +4,6 @@ pandas
 pydeck
 streamlit
 llama_index 
-pypdf 
+PyPDF2
 llama_hub
 openai
