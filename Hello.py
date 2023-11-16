@@ -25,7 +25,7 @@ class Document:
         self.doc_id = doc_id
         self.content = content
         self.hash = hash(content)
-
+pdf_documents = []
 # File uploader for PDF
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
 if pdf_file:
