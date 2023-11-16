@@ -26,6 +26,10 @@ class Document:
     def __init__(self, doc_id, content):
         self.doc_id = doc_id
         self.content = content
+
+    def get_doc_id(self):
+        return self.doc_id
+        
 # File uploader for PDF
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
 
