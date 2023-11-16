@@ -29,9 +29,11 @@ def get_pdf_text(pdf_docs):
     return text
 
 def get_text_chunks(text):
+    text = str(text)  # Ensure that text is a string
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
     chunks = text_splitter.split_text(text)
     return chunks
+
 
 def get_vector_store(text_chunks):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, request_timeout=120)
