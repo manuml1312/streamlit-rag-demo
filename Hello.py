@@ -26,7 +26,7 @@ if pdf_file:
     pdf_document = PdfReader(pdf_file)
     pdf_content = ""
     for page_num in range(len(pdf_document.pages)):  # Fixed the attribute name
-        page = pdf_document.getPage(page_num)  # Fixed the attribute name
+        page = pdf_document.pages[page_num]  # Fixed the attribute name
         pdf_content += page.extract_text()
 
     service_context = ServiceContext.from_defaults(llm=llm)
