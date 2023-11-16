@@ -22,7 +22,10 @@ llm = OpenAI(
     Keep the answers technical and in detail; don't summarize. Keep your answers accurate and based on 
     facts – do not hallucinate features."""
 )
-
+class Document:
+    def __init__(self, doc_id, content):
+        self.doc_id = doc_id
+        self.content = content
 # File uploader for PDF
 pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
 
