@@ -75,7 +75,7 @@ def main():
                 st.session_state.conversation = get_conversational_chain(vector_store)
                 st.success("Done")
         if st.button("Clear Chat"):
-            st.session_state.conversation= []
+            st.session_state.conversation= None
 
 if __name__ == "__main__":
     main()
