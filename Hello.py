@@ -40,6 +40,19 @@ def get_vector_store(text_chunks):
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     return vector_store
 
+# def get_conversational_chain(vector_store):
+#     llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
+#     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+#     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vector_store.as_retriever(), memory=memory)
+#     return conversation_chain
+
+# def user_input(user_question):
+#     response = st.session_state.conversation_chain.chat({'question': user_question})
+#     st.session_state.chat_history = response['chat_history']
+#     for i, message in enumerate(st.session_state.chat_history):
+#         role = "Human" if i % 2 == 0 else "Bot"
+#         st.write(f"{role}: {message.content}")
+
 def get_conversational_chain(vector_store):
     llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -47,11 +60,14 @@ def get_conversational_chain(vector_store):
     return conversation_chain
 
 def user_input(user_question):
-    response = st.session_state.conversation_chain.chat({'question': user_question})
-    st.session_state.chat_history = response['chat_history']
-    for i, message in enumerate(st.session_state.chat_history):
-        role = "Human" if i % 2 == 0 else "Bot"
-        st.write(f"{role}: {message.content}")
+    response = st.session_state.conversation_chain.respond({'question': user_question})
+    st.session_state.chatHistory = response['chat_history']
+    for i, message in enumerate(st.session_state.chatHistory):
+        if i % 2 == 0:
+            st.write("Human: ", message.content)
+        else:
+            st.write("Bot: ", message.content)
+
 
 def main():
     st.set_page_config("Chat with Multiple PDFs")
