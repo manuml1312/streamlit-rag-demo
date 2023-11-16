@@ -43,12 +43,15 @@ def main():
     st.header("LLM Powered Chatbot")
     user_question = st.text_input("Ask a Question from the uploaded file")
     
-    if "conversation_chain" not in st.session_state or st.session_state.conversation_chain is None:
+    # Initialize session state if not present
+    if "conversation_chain" not in st.session_state:
         st.session_state.conversation_chain = None
         st.session_state.chat_history = None
 
-    if user_question:
-        user_input(user_question)
+    # Check if conversation_chain is initialized and not None
+    if st.session_state.conversation_chain is not None:
+        if user_question:
+            user_input(user_question)
 
     with st.sidebar:
         st.title("SoothsayerAnalytics")
@@ -60,6 +63,7 @@ def main():
                 vector_store = get_vector_store(text_chunks)
                 st.session_state.conversation_chain = get_conversational_chain(vector_store)
                 st.success("Done")
+
 
 
 if __name__ == "__main__":
