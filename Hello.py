@@ -25,12 +25,19 @@ pdf_file = st.file_uploader("Upload PDF Document", type=["pdf", "txt"])
 if pdf_file:
     pdf_document = PdfReader(pdf_file)
     pdf_content = ""
-    for page_num in range(len(pdf_document.pages)):  # Fixed the attribute name
-        page = pdf_document.pages[page_num]  # Fixed the attribute name
+    for page_num in range(len(pdf_document.pages)):
+        page = pdf_document.pages[page_num]
         pdf_content += page.extract_text()
 
+    # Create a Document object for each page
+    for page_num in range(len(pdf_document.pages)):
+        page = pdf_document.pages[page_num]
+        page_text = page.extract_text()
+        doc = Document(f"Page {page_num + 1}", page_text)  # Use a unique identifier for the document
+        pdf_documents.append(doc)
+
     service_context = ServiceContext.from_defaults(llm=llm)
-    index = VectorStoreIndex.from_documents(pdf_content, service_context=service_context)
+    index = VectorStoreIndex.from_documents(pdf_documents, service_context=service_context)
 
     if "chat_engine" not in st.session_state.keys():  # Initialize the chat engine
         st.session_state.chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
